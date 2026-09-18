@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# ai-pipeline — entry point of the ai-dev-pipeline toolkit.
+#   ai-pipeline init [--force-validate]   set up .ai/ in the current git repository
+#   ai-pipeline doctor                    check CLIs, logins and models
+#   ai-pipeline [options]                 run the pipeline (see: ai-pipeline --help)
+set -Eeuo pipefail
+LIB_DIR="$(cd -- "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib" && pwd)"
+case "${1:-}" in
+  init)   shift; exec bash "$LIB_DIR/init.sh" "$@" ;;
+  doctor) shift; exec bash "$LIB_DIR/doctor.sh" "$@" ;;
+  *)      exec bash "$LIB_DIR/pipeline.sh" "$@" ;;
+esac

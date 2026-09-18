@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AI audit review",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["status", "summary", "critical", "major", "minor", "tests"],
+  "properties": {
+    "status": { "type": "string", "enum": ["PASS", "FAIL"] },
+    "summary": { "type": "string" },
+    "critical": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "major": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "minor": { "type": "array", "items": { "$ref": "#/$defs/finding" } },
+    "tests": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "notes"],
+      "properties": {
+        "status": { "type": "string", "enum": ["PASS", "FAIL", "NOT_RUN"] },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "line", "category", "title", "detail", "suggestion"],
+      "properties": {
+        "file": { "type": "string" },
+        "line": { "type": ["integer", "null"] },
+        "category": {
+          "type": "string",
+          "enum": [
+            "correctness", "security", "regression", "architecture", "edge-case",
+            "error-handling", "concurrency", "performance", "test-coverage",
+            "complexity", "plan-deviation", "other"
+          ]
+        },
+        "title": { "type": "string" },
+        "detail": { "type": "string" },
+        "suggestion": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Fake codex for tests: model catalog, feature list, and `exec` writing a review to -o.
+# FAKE_CODEX_PASS_AT=N: PASS from the Nth audit on; FAKE_CODEX_VARY=1: new title each time.
+case "${1:-} ${2:-}" in
+  "debug models") cat "$(dirname "$0")/codex-catalog.json"; exit 0 ;;
+  "features list") printf 'plugins stable true\napps stable true\nmulti_agent stable true\ngoals stable true\n'; exit 0 ;;
+  "login status") echo "Logged in"; exit 0 ;;
+esac
+out="" last=""; echo "$*" > "$FAKE_STATE/codex-args"
+while [[ $# -gt 0 ]]; do [[ $1 == -o ]] && { out=$2; shift; }; last=$1; shift; done
+c="$FAKE_STATE/codex.count"; n=$(( $(cat "$c" 2>/dev/null || echo 0) + 1 )); echo $n > "$c"
+printf '%s' "$last" > "$FAKE_STATE/codex-prompt-$n.txt"
+title="division by zero on empty input"; [[ -n "${FAKE_CODEX_VARY:-}" ]] && title="different problem number $n"
+if [[ $n -ge ${FAKE_CODEX_PASS_AT:-99} ]]; then st=PASS; maj='[]'
+else st=FAIL; maj='[{"file":"app.py","line":2,"category":"correctness","title":"'"$title"'","detail":"d","suggestion":"s"}]'; fi
+printf '{"status":"%s","summary":"fake %d","critical":[],"major":%s,"minor":[],"tests":{"status":"PASS","notes":[]}}' $st $n "$maj" > "$out"
+echo '{"type":"turn.completed","usage":{"input_tokens":30000,"cached_input_tokens":10000,"output_tokens":400,"reasoning_output_tokens":50}}'

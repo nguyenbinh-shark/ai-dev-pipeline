@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# Fake agy for tests. `agy models` lists models; otherwise records the prompt, edits
+# the repository per FAKE_AGY_MODE and prints agy's JSON result with usage.
+if [[ ${1:-} == models ]]; then
+  printf 'gemini-3.8-flash-high\tGemini 3.8 Flash (High)\ngemini-3.8-flash-medium\tGemini 3.8 Flash (Medium)\ngemini-3.8-flash-low\tGemini 3.8 Flash (Low)\n'
+  exit 0
+fi
+c="$FAKE_STATE/agy.count"; n=$(( $(cat "$c" 2>/dev/null || echo 0) + 1 )); echo $n > "$c"
+prompt="" log=""
+while [[ $# -gt 0 ]]; do case $1 in -p) prompt=$2; shift;; --log-file) log=$2; shift;; esac; shift; done
+printf '%s' "$prompt" > "$FAKE_STATE/agy-prompt-$n.txt"
+[[ -n "${FAKE_AGY_SLEEP:-}" ]] && sleep "$FAKE_AGY_SLEEP"
+case "${FAKE_AGY_MODE:-edit}" in
+  tamper)   echo "# pwn" >> .ai/validate.sh ;;
+  tamper-extra) echo "# pwn" >> build.sh ;;
+  failflag) echo "# edit $n" >> app.py; [[ $n -eq 1 ]] && touch FAILFLAG; [[ $n -eq 2 ]] && rm -f FAILFLAG ;;
+  edit) if [[ -z "${FAKE_AGY_NOOP_AFTER:-}" || $n -le $FAKE_AGY_NOOP_AFTER ]]; then echo "# edit $n" >> app.py; fi ;;
+esac
+[[ -n "$log" ]] && printf 'I0 x] Propagating selected model override to backend: label="Gemini 3.8 Flash (Medium)"\nURL: https://x/v1internal:streamGenerateContent?alt=sse\n' > "$log"
+echo '{"status":"SUCCESS","response":"DONE","denied_actions":[],"usage":{"input_tokens":20000,"output_tokens":500,"thinking_tokens":100,"cache_read_tokens":0,"total_tokens":20500}}'

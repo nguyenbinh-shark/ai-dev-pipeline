@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Fake claude for tests: a fixed plan/summary with usage.
+text='# Plan: guard\n\n## Objective\nx\n\n## Relevant Files\n- `app.py` — edit — y\n\n## Required Changes\n1. z\n\n## Constraints\n-\n\n## Validation\n- unit\n\n## Acceptance Criteria\n- a\n\n## Out of Scope\n- b'
+printf '{"type":"result","is_error":false,"result":"%s","modelUsage":{"claude-opus-5":{"inputTokens":10,"outputTokens":300,"cacheReadInputTokens":5000,"cacheCreationInputTokens":100,"thinkingTokens":20}}}\n' "$text"

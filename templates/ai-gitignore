@@ -1,0 +1,5 @@
+# Per-run output of ai-pipeline (anchored so .ai/prompts/summary.md could stay tracked)
+/logs/
+/review.json
+/summary.md
+/plan.md
